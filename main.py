@@ -16,6 +16,7 @@ import pickle
 import random
 import sys
 import time
+import nibabel
 import scipy.io as sio
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classification_report, \
     roc_curve, auc, roc_auc_score
@@ -23,6 +24,10 @@ from convnet_3d import CAE3d, stacked_CAE3d
 FLOAT_PRECISION = np.float32
 
 
+
+def get_nifty_img(fn):
+    data = nibabel.load(fn)
+    return data.get_data()
 
 def load_batch(batch_idx, num_batches, image_shape, data_dir, data_list):
     batch_size, d, c, h, w = image_shape
@@ -34,8 +39,7 @@ def load_batch(batch_idx, num_batches, image_shape, data_dir, data_list):
         batch_data = np.empty((len(batch_list),d,c,h,w), dtype=FLOAT_PRECISION)
     labels = []
     for index, filename in enumerate(batch_list):
-        data = sio.loadmat(data_dir+filename)
-        data = data['original'].reshape(1, d, c, h, w)
+        data = get_nifty_img(data_dir+filename).reshape(1, d, c, h, w)
         data_scaled = (data-data.min())/data.max()
         if 'AD' in filename:
             labels.append(0)
@@ -59,8 +63,7 @@ def load_batch_fold(batch_idx, num_batches, image_shape, fold, data_dir, data_li
         batch_data = np.empty((len(batch_list),d,c,h,w), dtype=FLOAT_PRECISION)
     labels = []
     for index, filename in enumerate(batch_list):
-        data = sio.loadmat(data_dir+filename)
-        data = data['original'].reshape(1, d, c, h, w)
+        data = get_nifty_img(data_dir+filename).reshape(1, d, c, h, w)
         data_scaled = (data-data.min())/data.max()
         if 'AD' in filename:
             labels.append(0)
@@ -84,8 +87,7 @@ def load_batch_AD_Normal(batch_idx, num_batches, image_shape, data_dir, data_lis
         batch_data = np.empty((len(batch_list),d,c,h,w), dtype=FLOAT_PRECISION)
     labels = []
     for index, filename in enumerate(batch_list):
-        data = sio.loadmat(data_dir+filename)
-        data = data['original'].reshape(1, d, c, h, w)
+        data = get_nifty_img(data_dir+filename).reshape(1, d, c, h, w)
         data_scaled = (data-data.min())/data.max()
         if 'AD' in filename:
             labels.append(0)
@@ -107,8 +109,7 @@ def load_batch_MCI_Normal(batch_idx, num_batches, image_shape, data_dir, data_li
         batch_data = np.empty((len(batch_list),d,c,h,w), dtype=FLOAT_PRECISION)
     labels = []
     for index, filename in enumerate(batch_list):
-        data = sio.loadmat(data_dir+filename)
-        data = data['original'].reshape(1, d, c, h, w)
+        data = get_nifty_img(data_dir+filename).reshape(1, d, c, h, w)
         data_scaled = (data-data.min())/data.max()
         if 'MCI' in filename:
             labels.append(0)
@@ -131,8 +132,7 @@ def load_batch_AD_MCI(batch_idx, num_batches, image_shape, data_dir, data_list):
         batch_data = np.empty((len(batch_list),d,c,h,w), dtype=FLOAT_PRECISION)
     labels = []
     for index, filename in enumerate(batch_list):
-        data = sio.loadmat(data_dir+filename)
-        data = data['original'].reshape(1, d, c, h, w)
+        data = get_nifty_img(data_dir+filename).reshape(1, d, c, h, w)
         data_scaled = (data-data.min())/data.max()
         if 'AD' in filename:
             labels.append(0)
@@ -154,8 +154,7 @@ def load_batch_AM_N(batch_idx, num_batches, image_shape, data_dir, data_list):
         batch_data = np.empty((len(batch_list),d,c,h,w), dtype=FLOAT_PRECISION)
     labels = []
     for index, filename in enumerate(batch_list):
-        data = sio.loadmat(data_dir+filename)
-        data = data['original'].reshape(1, d, c, h, w)
+        data = get_nifty_img(data_dir+filename).reshape(1, d, c, h, w)
         data_scaled = (data-data.min())/data.max()
         if 'AD' in filename or 'MCI' in filename:
             labels.append(0)
@@ -811,8 +810,7 @@ def main():
     print 'filter size:', flt_size
     sys.stdout.flush()
     data_list = os.listdir(data_dir)
-    sample = sio.loadmat(data_dir+data_list[0])
-    depth, height, width = sample['original'].shape
+    depth, height, width = get_nifty_img(data_dir+data_list[0]).shape
     in_channels   = 1
     in_time       = depth
     in_width      = width

@@ -11,12 +11,12 @@ __author__ = 'ehsanh'
 
 import numpy as np
 import pickle
-import maxpool3d
+#import maxpool3d
 import theano
 import theano.tensor as T
 from theano.tensor import nnet
-from theano.tensor.signal import downsample
-import conv3d2d
+import theano.tensor.signal.pool as pools
+#import conv3d2d
 from itertools import izip
 
 FLOAT_PRECISION = np.float32
@@ -92,24 +92,24 @@ class ConvolutionLayer3D(object):
             self.b_delta = theano.shared(value=b_values, borrow=True)
 
         # convolution
-        conv_out = conv3d2d.conv3d(
-            signals=input,
+        conv_out = nnet.conv3d(
+            input,
             filters=self.W,
-            signals_shape=signal_shape,
-            filters_shape=filter_shape,
+            input_shape=signal_shape,
+            filter_shape=filter_shape,
             border_mode=border_mode)
 
         #if poolsize:
         if if_pool:
             conv_out = conv_out.dimshuffle(0,2,1,3,4) #maxpool3d works on last 3 dimesnions
-            pooled_out = maxpool3d.max_pool_3d(
+            pooled_out = pools.pool_3d(
                 input=conv_out,
                 ds=poolsize,
                 ignore_border=True)
             tmp_out = pooled_out.dimshuffle(0,2,1,3,4)
             tmp = tmp_out + self.b.dimshuffle('x', 'x', 0, 'x', 'x')
         elif if_hidden_pool:
-            pooled_out = downsample.max_pool_2d(
+            pooled_out = pools.pool_2d(
                 input=conv_out,
                 ds=poolsize[:2],
                 st=stride,
@@ -364,7 +364,7 @@ class CAE3d(object):
         name = "train cae model"
         )
 
-        self.activation = maxpool3d.max_pool_3d(
+        self.activation = pools.pool_3d(
                 input=self.hidden_layer.output.dimshuffle(0,2,1,3,4),
                 ds=poolsize,
                 ignore_border=True)

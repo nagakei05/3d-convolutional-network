@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+theano = "==1.0.0"
+nibabel = "*"
+scipy = "*"
+scikit-learn = "*"
+latest = "*"
+nose = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "2.7"
